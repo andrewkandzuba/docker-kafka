@@ -14,6 +14,9 @@ if [ ! -z "$HELIOS_PORT_kafka" ]; then
     ADVERTISED_PORT=`echo $HELIOS_PORT_kafka | cut -d':' -f 2`
 fi
 
+# Force new line to the end of config file
+echo "" >> $KAFKA_HOME/config/server.properties
+
 # Set the external host and port
 if [ ! -z "$ADVERTISED_HOST" ]; then
     echo "advertised host: $ADVERTISED_HOST"
@@ -29,6 +32,46 @@ if [ ! -z "$ADVERTISED_PORT" ]; then
         sed -r -i "s/#(advertised.port)=(.*)/\1=$ADVERTISED_PORT/g" $KAFKA_HOME/config/server.properties
     else
         echo "advertised.port=$ADVERTISED_PORT" >> $KAFKA_HOME/config/server.properties
+    fi
+fi
+
+# Set transaction.state.log.replication.factor
+if [ ! -z "$TX_REPLICATION_FACTOR" ]; then
+    echo "transaction.state.log.replication.factor: $TX_REPLICATION_FACTOR"
+    if grep -q "^transaction.state.log.replication.factor" $KAFKA_HOME/config/server.properties; then
+        sed -r -i "s/#(transaction.state.log.replication.factor)=(.*)/\1=$TX_REPLICATION_FACTOR/g" $KAFKA_HOME/config/server.properties
+    else
+        echo "transaction.state.log.replication.factor=$TX_REPLICATION_FACTOR" >> $KAFKA_HOME/config/server.properties
+    fi
+fi
+
+# Set transaction.state.log.min.isr
+if [ ! -z "$TX_MIN_ISR" ]; then
+    echo "transaction.state.log.min.isr: $TX_MIN_ISR"
+    if grep -q "^transaction.state.log.min.isr" $KAFKA_HOME/config/server.properties; then
+        sed -r -i "s/#(transaction.state.log.min.isr)=(.*)/\1=$TX_MIN_ISR/g" $KAFKA_HOME/config/server.properties
+    else
+        echo "transaction.state.log.min.isr=$TX_MIN_ISR" >> $KAFKA_HOME/config/server.properties
+    fi
+fi
+
+# Set transaction.state.log.min.isr
+if [ ! -z "$TX_MIN_PARTITIONS" ]; then
+    echo "transaction.state.log.num.partitions: $TX_MIN_PARTITIONS"
+    if grep -q "^transaction.state.log.num.partitions" $KAFKA_HOME/config/server.properties; then
+        sed -r -i "s/#(transaction.state.log.num.partitions)=(.*)/\1=$TX_MIN_PARTITIONS/g" $KAFKA_HOME/config/server.properties
+    else
+        echo "transaction.state.log.num.partitions=$TX_MIN_PARTITIONS" >> $KAFKA_HOME/config/server.properties
+    fi
+fi
+
+# Set transaction.state.log.min.isr
+if [ ! -z "$TX_TIMEOUT" ]; then
+    echo "transaction.timeout.ms: $TX_TIMEOUT"
+    if grep -q "^transaction.timeout.ms" $KAFKA_HOME/config/server.properties; then
+        sed -r -i "s/#(transaction.timeout.ms)=(.*)/\1=$TX_TIMEOUT/g" $KAFKA_HOME/config/server.properties
+    else
+        echo "transaction.timeout.ms=$TX_TIMEOUT" >> $KAFKA_HOME/config/server.properties
     fi
 fi
 
