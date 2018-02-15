@@ -75,6 +75,16 @@ if [ ! -z "$TX_TIMEOUT" ]; then
     fi
 fi
 
+# Set transaction.state.log.min.isr
+if [ ! -z "$ZOOKEEPER_CONNECT" ]; then
+    echo "zookeeper.connect: $ZOOKEEPER_CONNECT"
+    if grep -q "^zookeeper.connect" $KAFKA_HOME/config/server.properties; then
+        sed -r -i "s/#(zookeeper.connect)=(.*)/\1=$ZOOKEEPER_CONNECT/g" $KAFKA_HOME/config/server.properties
+    else
+        echo "zookeeper.connect=$ZOOKEEPER_CONNECT" >> $KAFKA_HOME/config/server.properties
+    fi
+fi
+
 # Set the zookeeper chroot
 if [ ! -z "$ZK_CHROOT" ]; then
     # wait for zookeeper to start up
@@ -114,5 +124,7 @@ if [ ! -z "$AUTO_CREATE_TOPICS" ]; then
     echo "auto.create.topics.enable=$AUTO_CREATE_TOPICS" >> $KAFKA_HOME/config/server.properties
 fi
 
+# Run Zookeeper
+$KAFKA_HOME/bin/zookeeper-server-start.sh -daemon $KAFKA_HOME/config/zookeeper.properties
 # Run Kafka
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
